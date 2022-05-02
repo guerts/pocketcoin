@@ -1,0 +1,141 @@
+<div id="pkoin">
+
+    <div class="pkoin-notpaid" style="{if $pkoin_pay.paid}display: none;{/if}">
+        <!--{if $pkoin_before}<h3 class="pkoin-before">{$pkoin_before}</h3>{/if}-->
+        {if $pkoin_pay.data.qr}<div class="pkoin-qr"><img src="{$pkoin_pay.data.qr}" style="border: 1px solid #eee;border-radius: 5px;"></div>{/if}
+        <p class="pkoin-satoshi">
+            Сумма PKOIN: 
+            <strong>
+                {$pkoin_satoshi|replace:',':'.'}
+            </strong>
+        </p>
+        <p class="pkoin-address">
+            Кошелек: 
+            <strong style="margin-bottom: 15px;display: inline-block;">
+                <a href="{$pkoin_pay.data.url}">
+                    {$pkoin_address}
+                </a>
+            </strong>
+            <input type="text" value="{$pkoin_address}" id="copy-text" readonly="readonly" style="position:absolute;left: -999em;top: -999em;">
+            <a href="#" class="text-copy" style="margin: 0 10px; white-space: nowrap;min-width: 164px;display: inline-block;">
+                <svg x="0px" y="0px" viewBox="0 0 460 460" xml:space="preserve" style="width: 16px;">
+                    <path d="M425.934,0H171.662c-18.122,0-32.864,14.743-32.864,32.864v77.134h30V32.864c0-1.579,1.285-2.864,2.864-2.864h254.272c1.579,0,2.864,1.285,2.864,2.864v254.272c0,1.58-1.285,2.865-2.864,2.865h-74.729v30h74.729c18.121,0,32.864-14.743,32.864-32.865V32.864C458.797,14.743,444.055,0,425.934,0z"/>
+                    <path d="M288.339,139.998H34.068c-18.122,0-32.865,14.743-32.865,32.865v254.272C1.204,445.257,15.946,460,34.068,460h254.272c18.122,0,32.865-14.743,32.865-32.864V172.863C321.206,154.741,306.461,139.998,288.339,139.998z M288.341,430H34.068c-1.58,0-2.865-1.285-2.865-2.864V172.863c0-1.58,1.285-2.865,2.865-2.865h254.272c1.58,0,2.865,1.285,2.865,2.865v254.273h0.001C291.206,428.715,289.92,430,288.341,430z"/>
+                </svg>
+                <span>Скопировать адрес</span>
+            </a>
+        </p>
+        <p class="pkoin-to_pay" style="color:red;{if !$pkoin_pay.data.to_pay}display: none;{/if}">Нехватает: <strong>{$pkoin_pay.data.to_pay|replace:',':'.'} PKOIN</strong></p>
+        <!--{if $pkoin_after}<p class="small pkoin-after">{$pkoin_after}</p>{/if}-->
+        <p class="small">
+            Скорость подтверждения транзакций зависит от загруженности сети и может длиться от 20 минут до нескольких дней.<br>
+            Вы всегда сможете увидеть статус обработки на <a href="{$pkoin_order_url}">странице заказа</a> и в <a href="https://bastyon.com/blockexplorer/address/{$pkoin_address}" target="_blank">сети PKOIN</a>.
+        </p>
+    </div>
+    
+    {*
+    <!--<div class="pkoin-paid" style="{if $pkoin_pay.paid}display: none;{/if}">
+        <div class="pkoin-proccessing"
+             style="{if $pkoin_confirmations >= $pkoin_confirmation_nedded}display:none;{/if}">
+            <h3>Ваш платеж обрабатывается</h3>
+            <p>Всего <strong class="pkoin-confirmations">{$pkoin_confirmations}</strong> подтверждений сети
+                Биткоин из <strong class="pkoin-confirmations-needed">{$pkoin_confirmation_nedded}</strong> необходимых.
+            </p>
+            <p class="small">
+                Скорость подтверждения транзакций зависит от загруженности сети и может длиться от 20 минут до нескольких дней.<br>
+                Вы всегда сможете увидеть статус обработки на <a href="{$pkoin_order_url}">странице заказа</a> и в <a href="https://bitaps.com/ru/{$pkoin_address}" target="_blank">сети Биткоин</a>.
+            </p>
+        </div>
+        <h3 class="pkoin-done"
+            style="{if $pkoin_confirmations < $pkoin_confirmation_nedded}display:none;{/if}">
+            Ваш платеж полностью получен!
+        </h3>
+    </div>-->
+    *}
+    
+    <div class="pkoin-paid" style="{if !$pkoin_pay.paid}display: none;{/if}">
+        <h3 class="pkoin-done">
+            Ваш платеж полностью получен!
+        </h3>
+    </div>
+    
+    <p class="small pkoin-proccessing" style="{if $pkoin_pay.paid}display: none;{/if}">
+        Обновление информации произойдет через <span data-pkoin-refresh></span> сек.
+    </p>
+
+</div>
+
+<style>
+.text-copy.copied::after {
+  content: 'Адрес скопирован!';
+}
+.text-copy.copied span {
+  display: none;
+}
+</style>
+
+<script>
+    (function () {
+        'use strict';
+
+        var $pkoin = $('#pkoin'),
+            sec = 10,
+            wait = 10,
+            counter = 1;
+
+        function requestStatus() {
+            $pkoin.find('.pkoin-confirmations').text('...');
+            $.get("{$pkoin_url}&id={$pkoin_order_id}", function (r) {
+                if (r.paid) {
+                    $pkoin.find('.pkoin-notpaid').hide();
+                    $pkoin.find('.pkoin-paid').show();
+                    $pkoin.find('.pkoin-proccessing').hide();
+                    setTimeout(function () {
+                        $pkoin.find('.pkoin-confirmations').text(r.confirmations);
+                    }, 500);
+                } else {
+                    $pkoin.find('.pkoin-qr img').attr('src', r.data.qr);
+                    $pkoin.find('.pkoin-address a').attr('href', r.data.url);
+                    var $topay = $pkoin.find('.pkoin-to_pay');
+                    $topay.find('strong').text(r.data.to_pay+' PKOIN');
+                    if (r.data.to_pay > 0) {
+                        $topay.show();
+                    } else {
+                        $topay.hide();
+                    }
+                }
+                if (r.confirmations >= r.confirmations_needed) {
+                    $pkoin.find('.pkoin-proccessing').hide();
+                    return;
+                }
+                counter = Math.round(counter * 1.8);
+                sec = counter * wait;
+                setTimeout(requestStatus, sec * 1000 - 1000);
+            }, 'json');
+        }
+        
+        var tik = $pkoin.find('.pkoin-proccessing');
+        if (tik.is(':visible')) {
+            $pkoin.find('[data-pkoin-refresh]').text(wait);
+            setTimeout(requestStatus, wait * 1000);
+            setInterval(function () {
+                sec--;
+                $pkoin.find('[data-pkoin-refresh]').text(sec);
+            }, 1000);
+        }
+        
+        $(document).on('click', '.text-copy', function() {
+            var self = $(this);
+            var copyText = document.getElementById("copy-text");
+            copyText.select();
+            copyText.setSelectionRange(0, 99999); /*For mobile devices*/
+            document.execCommand("copy");
+            self.addClass('copied');
+            setTimeout(function() {
+                self.removeClass('copied');
+            }, 2000);
+            return false;
+        });
+        
+    }());
+</script>
