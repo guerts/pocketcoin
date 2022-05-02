@@ -1,7 +1,9 @@
-install:
-clone to .../wa-plugins/payment/[dir:pocketcoin]
+Installation:
+1. clone repo to
+.../wa-plugins/payment/[dir:pocketcoin]
 
-unzip .../wa-plugins/payment/pocketcoin/lib/classes/bitcoin-php/bitcoin-php.zip
+2. unzip
+.../wa-plugins/payment/pocketcoin/lib/classes/bitcoin-php/bitcoin-php.zip
 
-setup:
-go to [yoursite domain]/webasyst/shop/?action=settings#/payment/plugin/add/pocketcoin/
+Go to setup page:
+[yoursite domain]/webasyst/shop/?action=settings#/payment/plugin/add/pocketcoin/
