@@ -1,9 +1,5 @@
-tolstoycomments.com post's export for webasyst blog
-
 install:
-clone to ./wa-apps/blog/plugins/[dir:tolstoycomments]
-add line 'tolstoycomments' => true between array of config ./wa-config/blog/plugins.php
+clone to .../wa-plugins/payment/[dir:pocketcoin]
 
 setup:
-get api-key and site-id from settings section on tolstoycomments.com
-place into [yoursite domain]/webasyst/blog/?module=plugins#/tolstoy
+go to [yoursite domain]/webasyst/shop/?action=settings#/payment/plugin/add/pocketcoin/
